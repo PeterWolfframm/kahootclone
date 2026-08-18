@@ -1,0 +1,23 @@
+:root { font-family: ui-sans-serif, system-ui, sans-serif; color: #e8e8ee; background: #0e0f14; }
+* { box-sizing: border-box; }
+body, html, #root { margin: 0; height: 100%; }
+.shell { display: grid; grid-template-columns: 280px 1fr; height: 100%; }
+aside { border-right: 1px solid #242636; padding: 18px; overflow: auto; }
+aside h1 { margin: 0 0 8px; }
+aside h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: #8b8fa3; }
+aside button, aside input { width: 100%; margin: 4px 0; padding: 8px; border-radius: 8px; border: 1px solid #2c3044; background: #161826; color: inherit; }
+aside button.on { background: #3b5bfd; border-color: #3b5bfd; }
+.follow { display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
+.presets button { font-size: 12px; }
+.ghost, a { color: #9aa3c7; }
+main { overflow: auto; padding: 18px 28px; }
+.search { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #2c3044; background: #161826; color: inherit; margin-bottom: 16px; }
+article { padding: 14px 0; border-bottom: 1px solid #242636; cursor: pointer; }
+article.read { opacity: 0.45; }
+article h3 { margin: 4px 0; }
+.meta { font-size: 12px; color: #8b8fa3; }
+.muted { color: #8b8fa3; }
+.err { color: #ff6b7a; }
+.auth { max-width: 360px; margin: 12vh auto; }
+.auth input, .auth button { width: 100%; margin: 6px 0; padding: 10px; border-radius: 8px; border: 1px solid #2c3044; background: #161826; color: inherit; }
+@media (max-width: 800px) { .shell { grid-template-columns: 1fr; } }
