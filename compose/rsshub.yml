@@ -37,7 +37,7 @@ services:
     depends_on:
       - rsshub
     environment:
-      - SERVICE_FQDN_READER_80
+      SERVICE_FQDN_READER_80: rsshub.happylittleventures.com
     expose:
       - "80"
     healthcheck:
