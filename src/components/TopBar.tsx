@@ -2,6 +2,7 @@ import { Link, NavLink } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import type { User } from '@supabase/supabase-js';
+import { Button } from '../design-system';
 
 export function TopBar() {
   const [user, setUser] = useState<User | null>(null);
@@ -22,12 +23,9 @@ export function TopBar() {
           <>
             <NavLink to="/library">My kahoots</NavLink>
             <NavLink to="/reports">Reports</NavLink>
-            <button
-              className="btn-ghost"
-              onClick={() => supabase.auth.signOut()}
-            >
+            <Button variant="ghost" size="sm" onClick={() => supabase.auth.signOut()}>
               Log out
-            </button>
+            </Button>
           </>
         ) : (
           <NavLink to="/auth">Log in</NavLink>

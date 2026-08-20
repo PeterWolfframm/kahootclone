@@ -41,8 +41,8 @@ export type OptionRow = {
   is_correct: boolean;
 };
 
-export const COLORS = ['#e21b3c', '#1368ce', '#d89e00', '#26890c'] as const;
-export const COLOR_NAMES = ['Red', 'Blue', 'Yellow', 'Green'] as const;
+export const COLORS = ['#e0102b', '#c2621d', '#c77700', '#0a8a4a'] as const;
+export const COLOR_NAMES = ['Red', 'Orange', 'Amber', 'Green'] as const;
 export const SHAPES = ['triangle', 'diamond', 'circle', 'square'] as const;
 export const TIME_OPTIONS = [5000, 10000, 20000, 30000, 60000, 90000, 120000];
 

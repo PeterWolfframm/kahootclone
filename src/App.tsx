@@ -7,6 +7,7 @@ import { Editor } from './pages/Editor';
 import { Reports, ReportDetail } from './pages/Reports';
 import { HostLaunch, HostLive } from './pages/Host';
 import { Play } from './pages/Play';
+import { Showcase } from './pages/Showcase';
 import { SpacetimeProvider } from './lib/spacetime';
 
 export default function App() {
@@ -24,6 +25,7 @@ export default function App() {
           <Route path="/host/:id" element={<HostLaunch />} />
           <Route path="/host/live/:pin" element={<HostLive />} />
           <Route path="/play/:pin" element={<Play />} />
+          <Route path="/showcase" element={<Showcase />} />
         </Routes>
       </BrowserRouter>
     </SpacetimeProvider>

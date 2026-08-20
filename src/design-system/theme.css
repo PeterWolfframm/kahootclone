@@ -1,0 +1,212 @@
+@import 'tailwindcss';
+
+/*
+  Map Keypad CSS variables onto Tailwind theme keys.
+  Tokens stay the source of truth in tokens.css; these aliases make
+  `bg-accent`, `shadow-hard-md`, `rounded-lg`, `font-display` work as utilities.
+*/
+@theme inline {
+  /* fonts */
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
+
+  /* type scale — Keypad sizes, not Tailwind defaults */
+  --text-2xs: var(--text-2xs);
+  --text-xs: var(--text-xs);
+  --text-sm: var(--text-sm);
+  --text-md: var(--text-md);
+  --text-lg: var(--text-lg);
+  --text-xl: var(--text-xl);
+  --text-2xl: var(--text-2xl);
+  --text-3xl: var(--text-3xl);
+  --text-4xl: var(--text-4xl);
+  --leading-tight: var(--leading-tight);
+  --leading-snug: var(--leading-snug);
+  --leading-normal: var(--leading-normal);
+  --leading-relaxed: var(--leading-relaxed);
+  --tracking-tight: var(--tracking-tight);
+  --tracking-wide: var(--tracking-wide);
+  --tracking-widest: var(--tracking-widest);
+
+  /* radii */
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-pill: var(--radius-pill);
+
+  /* shadows — hard-offset, zero blur */
+  --shadow-hard-sm: var(--shadow-hard-sm);
+  --shadow-hard-md: var(--shadow-hard-md);
+  --shadow-hard-lg: var(--shadow-hard-lg);
+  --shadow-hard-press: var(--shadow-hard-press);
+  --shadow-hard-accent-md: var(--shadow-hard-accent-md);
+  --shadow-focus-ring: var(--shadow-focus-ring);
+
+  /* motion */
+  --ease-standard: var(--ease-standard);
+  --ease-out-back: var(--ease-out-back);
+  --ease-in: var(--ease-in);
+  --duration-instant: var(--duration-instant);
+  --duration-fast: var(--duration-fast);
+  --duration-base: var(--duration-base);
+  --duration-slow: var(--duration-slow);
+
+  /* neutrals */
+  --color-black: var(--black);
+  --color-white: var(--white);
+  --color-grey-950: var(--grey-950);
+  --color-grey-900: var(--grey-900);
+  --color-grey-700: var(--grey-700);
+  --color-grey-500: var(--grey-500);
+  --color-grey-300: var(--grey-300);
+  --color-grey-200: var(--grey-200);
+  --color-grey-100: var(--grey-100);
+  --color-grey-50: var(--grey-50);
+
+  /* beige */
+  --color-beige-300: var(--beige-300);
+  --color-beige-200: var(--beige-200);
+  --color-beige-100: var(--beige-100);
+  --color-beige-50: var(--beige-50);
+
+  /* accent scale + semantic aliases */
+  --color-accent: var(--accent-primary);
+  --color-accent-hover: var(--accent-primary-hover);
+  --color-accent-press: var(--accent-primary-press);
+  --color-accent-soft: var(--accent-primary-soft);
+  --color-accent-soft-strong: var(--accent-primary-soft-strong);
+  --color-accent-700: var(--accent-700);
+  --color-accent-600: var(--accent-600);
+  --color-accent-500: var(--accent-500);
+  --color-accent-400: var(--accent-400);
+  --color-accent-100: var(--accent-100);
+  --color-accent-50: var(--accent-50);
+  --color-on-accent: var(--text-on-accent);
+
+  /* surfaces */
+  --color-surface-page: var(--surface-page);
+  --color-surface-inverse: var(--surface-inverse);
+  --color-surface-card: var(--surface-card);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-surface-warm: var(--surface-warm);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-overlay: var(--surface-overlay);
+
+  /* text */
+  --color-fg: var(--text-primary);
+  --color-fg-inverse: var(--text-inverse);
+  --color-secondary: var(--text-secondary);
+  --color-muted: var(--text-muted);
+  --color-link: var(--text-link);
+  --color-link-hover: var(--text-link-hover);
+
+  /* semantic */
+  --color-success: var(--semantic-success);
+  --color-success-soft: var(--semantic-success-soft);
+  --color-danger: var(--semantic-danger);
+  --color-danger-soft: var(--semantic-danger-soft);
+  --color-warning: var(--semantic-warning);
+  --color-warning-soft: var(--semantic-warning-soft);
+
+  /* borders */
+  --color-default: var(--border-default);
+  --color-subtle: var(--border-subtle);
+  --color-on-inverse: var(--border-on-inverse);
+}
+
+/* Repeating recipes — grouped class names for the haptic language. */
+
+@utility haptic {
+  border-width: var(--border-width-md);
+  border-style: solid;
+  border-color: var(--black);
+  box-shadow: var(--shadow-hard-md);
+  transition:
+    transform var(--duration-fast) var(--ease-out-back),
+    box-shadow var(--duration-fast) var(--ease-standard),
+    background-color var(--duration-fast) var(--ease-standard);
+  &:active:not(:disabled) {
+    transform: translate(var(--press-translate), var(--press-translate)) scale(var(--press-scale));
+    box-shadow: var(--shadow-hard-press);
+  }
+  &:disabled {
+    box-shadow: none;
+    transform: none;
+    cursor: not-allowed;
+  }
+  /* Ghost / unraised: keep the press translate, drop the offset shadow. */
+  &:is(.shadow-none) {
+    box-shadow: none;
+    &:active:not(:disabled) {
+      box-shadow: none;
+    }
+  }
+  &:is(.border-transparent) {
+    border-color: transparent;
+  }
+}
+
+@keyframes toast-in {
+  from {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes badge-in {
+  from {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@utility surface-card {
+  background: var(--surface-card);
+  border: var(--border-width-md) solid var(--black);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-hard-md);
+}
+
+@utility type-label {
+  font: var(--font-label);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+@utility focus-accent {
+  &:focus,
+  &:focus-visible {
+    border-color: var(--accent-primary);
+    box-shadow: var(--shadow-focus-ring);
+    outline: none;
+  }
+}
+
+@utility control {
+  width: 100%;
+  font: var(--font-body-lg);
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  border: var(--border-width-md) solid var(--black);
+  outline: none;
+  background: var(--white);
+  color: var(--black);
+  font-family: var(--font-body);
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard);
+  &:disabled {
+    background: var(--grey-50);
+  }
+}

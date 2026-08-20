@@ -1,0 +1,35 @@
+{
+  "plugins": [
+    "react",
+    "import"
+  ],
+  "rules": {
+    "react/forbid-elements": [
+      "warn",
+      {
+        "forbid": []
+      }
+    ],
+    "no-restricted-imports": [
+      "warn",
+      {
+        "patterns": [
+          {
+            "group": [
+              "components/buttons/**",
+              "components/forms/**",
+              "components/navigation/**",
+              "components/overlay/**",
+              "components/surfaces/**",
+              "ui_kits/admin-dashboard/**",
+              "ui_kits/quiz-app/**",
+              "ui_kits/quiz-live/**",
+              "ui_kits/website/**"
+            ],
+            "message": "Import design-system components from 'index.js', not component internals."
+          }
+        ]
+      }
+    ]
+  }
+}

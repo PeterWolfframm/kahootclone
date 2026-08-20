@@ -13,6 +13,14 @@ import {
 } from '../lib/supabase';
 import { blankQuestion, defaultOptions } from '../lib/quiz';
 
+const TYPE_LABELS: Record<QuestionType, string> = {
+  quiz: 'Quiz',
+  true_false: 'True/false',
+  multi_select: 'Multi-select',
+  type_answer: 'Type answer',
+  slider: 'Slider',
+};
+
 export function Editor() {
   const { id } = useParams();
   const nav = useNavigate();
@@ -23,6 +31,7 @@ export function Editor() {
   const [selected, setSelected] = useState<string | null>(null);
   const [mine, setMine] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [promptDraft, setPromptDraft] = useState('');
 
   const q = questions.find(x => x.id === selected) ?? null;
   const qOpts = useMemo(
@@ -56,6 +65,10 @@ export function Editor() {
   useEffect(() => {
     load();
   }, [id]);
+
+  useEffect(() => {
+    setPromptDraft(q?.prompt ?? '');
+  }, [q?.id, q?.prompt]);
 
   async function saveKahoot(patch: Partial<KahootRow>) {
     if (!id || !mine) return;
@@ -92,9 +105,26 @@ export function Editor() {
 
   async function saveTypeAnswer(value: string) {
     if (!q || !mine) return;
-    setTypeAnswers(m => ({ ...m, [q.id]: value }));
     await supabase.from('type_answers').delete().eq('question_id', q.id);
     if (value.trim()) await supabase.from('type_answers').insert({ question_id: q.id, answer: value.trim() });
+  }
+
+  async function deleteQuestion() {
+    if (!q || !mine) return;
+    if (!confirm('Delete this question?')) return;
+    await supabase.from('options').delete().eq('question_id', q.id);
+    await supabase.from('type_answers').delete().eq('question_id', q.id);
+    const { error } = await supabase.from('questions').delete().eq('id', q.id);
+    if (error) return alert(error.message);
+    const remaining = questions.filter(x => x.id !== q.id);
+    setQuestions(remaining);
+    setOptions(os => os.filter(o => o.question_id !== q.id));
+    setTypeAnswers(m => {
+      const next = { ...m };
+      delete next[q.id];
+      return next;
+    });
+    setSelected(remaining[0]?.id ?? null);
   }
 
   async function upload(kind: 'covers' | 'questions', file: File) {
@@ -151,6 +181,25 @@ export function Editor() {
             </button>
           </div>
         </div>
+        {mine && (
+          <div className="row" style={{ marginTop: 10, alignItems: 'center' }}>
+            <label className="btn btn-dark" style={{ width: 'auto' }}>
+              Cover
+              <input
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={async e => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  const url = await upload('covers', file);
+                  if (url) saveKahoot({ cover_url: url });
+                }}
+              />
+            </label>
+            {kahoot.cover_url && <img src={kahoot.cover_url} alt="" style={{ height: 48, borderRadius: 6 }} />}
+          </div>
+        )}
         <textarea
           className="field"
           disabled={!mine}
@@ -171,7 +220,7 @@ export function Editor() {
             <div className="row" style={{ marginTop: 8 }}>
               {(['quiz', 'true_false', 'multi_select', 'type_answer', 'slider'] as QuestionType[]).map(t => (
                 <button key={t} className="btn btn-dark" style={{ width: 'auto', fontSize: 12, padding: '8px 10px' }} onClick={() => addQuestion(t)}>
-                  {t.replace('_', ' ')}
+                  {TYPE_LABELS[t]}
                 </button>
               ))}
             </div>
@@ -182,8 +231,19 @@ export function Editor() {
             <p>Add a question to get started.</p>
           ) : (
             <>
-              <label className="label">Question</label>
-              <input className="field" disabled={!mine} value={q.prompt} onChange={e => saveQuestion({ prompt: e.target.value })} />
+              <label className="label" htmlFor="prompt">
+                Question
+              </label>
+              <input
+                id="prompt"
+                className="field"
+                disabled={!mine}
+                value={promptDraft}
+                onChange={e => setPromptDraft(e.target.value)}
+                onBlur={() => {
+                  if (promptDraft !== q.prompt) saveQuestion({ prompt: promptDraft });
+                }}
+              />
               <div className="row">
                 <label>
                   Time{' '}
@@ -236,7 +296,13 @@ export function Editor() {
               {q.type === 'type_answer' ? (
                 <>
                   <label className="label">Accepted answer</label>
-                  <input className="field" disabled={!mine} value={typeAnswers[q.id] ?? ''} onChange={e => saveTypeAnswer(e.target.value)} />
+                  <input
+                    className="field"
+                    disabled={!mine}
+                    value={typeAnswers[q.id] ?? ''}
+                    onChange={e => setTypeAnswers(m => ({ ...m, [q.id]: e.target.value }))}
+                    onBlur={e => saveTypeAnswer(e.target.value)}
+                  />
                 </>
               ) : q.type === 'slider' ? (
                 <div className="row">
@@ -284,6 +350,13 @@ export function Editor() {
                     </div>
                   ))}
                 </div>
+              )}
+              {mine && (
+                <p>
+                  <button className="btn btn-red" type="button" style={{ width: 'auto' }} onClick={deleteQuestion}>
+                    Delete question
+                  </button>
+                </p>
               )}
               {!mine && <p>You can host this public kahoot, but only the owner can edit it.</p>}
               <p>

@@ -343,8 +343,6 @@ function lockAndScore(
   const secret = ctx.db.quiz_secret.game_id.find(g.id);
   if (!secret) return;
   const q = secret.questions[g.question_index];
-  const startedMicros = g.phase_started_at.microsSinceUnixEpoch;
-  const now = ctx.timestamp.microsSinceUnixEpoch;
   const counts = [0, 0, 0, 0];
   let typedCorrect = 0;
   let correctMask = 0;
@@ -353,11 +351,10 @@ function lockAndScore(
   });
 
   for (const a of ctx.db.answer.by_game_question.filter([g.id, g.question_index])) {
-    const elapsed = Number((now - startedMicros) / 1000n);
     const correct = isAnswerCorrect(q, a.choice_mask, a.typed, a.slider_value);
     const p = ctx.db.player.identity.find(a.player);
     const streak = p?.streak ?? 0;
-    const scored = scoreFor(correct, a.elapsed_ms || elapsed, q.time_limit_ms, q.points_multiplier, streak);
+    const scored = scoreFor(correct, a.elapsed_ms, q.time_limit_ms, q.points_multiplier, streak);
     ctx.db.answer.id.update({
       ...a,
       is_correct: correct,

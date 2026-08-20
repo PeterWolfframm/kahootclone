@@ -13,7 +13,7 @@ type Report = {
 };
 
 export function Reports() {
-  const [rows, setRows] = useState<Report[]>([]);
+  const [rows, setRows] = useState<Report[] | null>(null);
   const nav = useNavigate();
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
@@ -27,28 +27,36 @@ export function Reports() {
       <TopBar />
       <div className="library">
         <h1>Reports</h1>
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Kahoot</th>
-              <th>PIN</th>
-              <th>Players</th>
-              <th>When</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map(r => (
-              <tr key={r.id}>
-                <td>
-                  <Link to={`/reports/${r.id}`}>{r.title}</Link>
-                </td>
-                <td>{r.pin}</td>
-                <td>{r.player_count}</td>
-                <td>{new Date(r.played_at).toLocaleString()}</td>
+        {rows === null ? (
+          <p className="muted">Loading…</p>
+        ) : rows.length === 0 ? (
+          <p>
+            No games yet. Host a kahoot from your <Link to="/library">library</Link> to see results here.
+          </p>
+        ) : (
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Kahoot</th>
+                <th>PIN</th>
+                <th>Players</th>
+                <th>When</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {rows.map(r => (
+                <tr key={r.id}>
+                  <td>
+                    <Link to={`/reports/${r.id}`}>{r.title}</Link>
+                  </td>
+                  <td>{r.pin}</td>
+                  <td>{r.player_count}</td>
+                  <td>{new Date(r.played_at).toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );
@@ -67,26 +75,30 @@ export function ReportDetail() {
       <TopBar />
       <div className="library">
         <h1>{title}</h1>
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Rank</th>
-              <th>Player</th>
-              <th>Score</th>
-              <th>Correct</th>
-            </tr>
-          </thead>
-          <tbody>
-            {players.map(p => (
-              <tr key={p.rank + p.nickname}>
-                <td>{p.rank}</td>
-                <td>{p.nickname}</td>
-                <td>{p.score}</td>
-                <td>{p.correct_count}</td>
+        {players.length === 0 ? (
+          <p className="muted">No player scores recorded.</p>
+        ) : (
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Player</th>
+                <th>Score</th>
+                <th>Correct</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {players.map(p => (
+                <tr key={p.rank + p.nickname}>
+                  <td>{p.rank}</td>
+                  <td>{p.nickname}</td>
+                  <td>{p.score}</td>
+                  <td>{p.correct_count}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );

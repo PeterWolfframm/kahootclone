@@ -1,6 +1,7 @@
 let ctx: AudioContext | null = null;
 let lobby = false;
 let timer: number | null = null;
+let musicMuted = false;
 
 function ac() {
   if (!ctx) ctx = new AudioContext();
@@ -34,8 +35,17 @@ export function playTick() {
   beep(880, 0.06, 'square', 0.04);
 }
 
+export function isLobbyMusicMuted() {
+  return musicMuted;
+}
+
+export function setLobbyMusicMuted(muted: boolean) {
+  musicMuted = muted;
+  if (muted) stopLobbyMusic();
+}
+
 export function startLobbyMusic() {
-  if (lobby) return;
+  if (lobby || musicMuted) return;
   lobby = true;
   const notes = [392, 494, 587, 494, 523, 392, 440, 494];
   let i = 0;

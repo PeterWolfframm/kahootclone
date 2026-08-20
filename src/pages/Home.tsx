@@ -1,15 +1,23 @@
 import { FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TopBar } from '../components/TopBar';
+import { Button } from '../design-system';
 
 export function Home() {
   const [pin, setPin] = useState('');
+  const [error, setError] = useState('');
   const nav = useNavigate();
+  const clean = pin.replace(/\D/g, '');
+  const valid = clean.length === 7;
 
   function join(e: FormEvent) {
     e.preventDefault();
-    const clean = pin.replace(/\D/g, '');
-    if (clean.length >= 6) nav(`/play/${clean}`);
+    if (!valid) {
+      setError('Enter the 7-digit PIN from the host screen.');
+      return;
+    }
+    setError('');
+    nav(`/play/${clean}`);
   }
 
   return (
@@ -19,19 +27,28 @@ export function Home() {
         <form className="card" onSubmit={join}>
           <h1>Join a game</h1>
           <p>Enter the game PIN from the host screen.</p>
-          <div className="label">Game PIN</div>
+          <label className="label" htmlFor="pin">
+            Game PIN
+          </label>
           <input
+            id="pin"
             className="pin"
             inputMode="numeric"
-            maxLength={8}
+            pattern="[0-9]*"
+            maxLength={7}
             value={pin}
-            onChange={e => setPin(e.target.value)}
+            onChange={e => {
+              setPin(e.target.value.replace(/\D/g, '').slice(0, 7));
+              setError('');
+            }}
             placeholder="0000000"
+            autoComplete="off"
             autoFocus
           />
-          <button className="btn btn-primary" type="submit">
+          {error && <div className="error">{error}</div>}
+          <Button type="submit" variant="primary" size="lg" disabled={!valid} style={{ width: '100%' }}>
             Enter
-          </button>
+          </Button>
         </form>
       </div>
     </div>
