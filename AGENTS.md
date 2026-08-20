@@ -495,3 +495,42 @@ export const myProfile = spacetimedb.view(
   (ctx) => ctx.db.entity.identity.find(ctx.sender) ?? undefined
 );
 ```
+
+## Cursor Cloud specific instructions
+
+This repo is a small multi-product monorepo. The **primary** product is the Kahoot clone (root `package.json` + `src/` frontend, `spacetimedb/` realtime module). Secondary products are the RSS reader (`reader/`) and the Grav CMS site (`grav/`).
+
+Three independent npm projects (each has its own `package.json`/lockfile — not npm workspaces): root, `spacetimedb/`, `reader/`. The update script runs `npm install` in all three; deps are already installed in the VM snapshot.
+
+### Running the primary Kahoot app (dev)
+
+The `spacetime` CLI (v2.8.2, matching the `spacetimedb` npm dep) is preinstalled at `~/.local/bin` and on `PATH` via `~/.bashrc`. Run these from the repo root:
+
+1. `spacetime start` — local SpacetimeDB server on `:3000` (long-running; use a tmux/background session).
+2. `spacetime publish kahoot --server local -p spacetimedb -y` — build + publish the module as database name `kahoot` (the name the frontend expects).
+3. `npm run dev` — Vite dev server on `:4173` (see `vite.config.ts`).
+
+A local `.env` is required (gitignored). For local dev it must contain:
+```
+VITE_SPACETIME_URI=ws://127.0.0.1:3000
+VITE_SPACETIME_DB_NAME=kahoot
+VITE_SUPABASE_URL=https://hbttairrkkohiedcymmc.supabase.co
+VITE_SUPABASE_ANON_KEY=<non-empty>
+```
+
+### Non-obvious gotchas
+
+- **`spacetime.json` mis-targets CLI subcommands.** It sets `database: kahootclone-cofwa` and the default server is `maincloud`, so `spacetime call|sql|logs|describe` will hit the wrong DB/server. For the local `kahoot` DB, always pass `--no-config -s local kahoot`, e.g. `spacetime sql --no-config -s local kahoot "SELECT * FROM game"`. (`spacetime publish` with explicit `kahoot --server local` works fine.)
+- **`npm run generate` uses a removed flag.** The script passes `--project-path`, which CLI 2.8.2 renamed to `--module-path`. Use `spacetime generate --lang typescript --out-dir src/module_bindings --module-path spacetimedb`. Bindings in `src/module_bindings/` are committed and current (regenerating only rewrites a CLI-version comment).
+- **`src/lib/supabase.ts` calls `createClient` at import time**, which throws on an empty `VITE_SUPABASE_ANON_KEY` and crashes the whole app on load. Any non-empty value lets the app boot; the SpacetimeDB realtime game does not touch Supabase.
+- **Supabase-backed features need the real anon key** (project `hbttairrkkohiedcymmc`): sign-in (`/auth`), quiz library/editor, hosting-from-library (`/host/:id`), and reports. Set `VITE_SUPABASE_ANON_KEY` (a secret) to enable these. Without it, exercise the full realtime engine by hosting directly via the reducer: `spacetime call --no-config -s local kahoot host_game '"Title"' '""' true '<QuizQuestion[] JSON>'`, read the PIN from the `game` table, then join a player at `http://localhost:4173/play/<pin>`. The host identity cannot join as a player.
+- **Game phases auto-advance** via scheduled reducers (`get_ready`→`preview`→`answering`→`reveal`→`scoreboard`/`podium`); once one player answers, scoring locks immediately. The host can also force-advance with the `advance` reducer.
+
+### Secondary products (optional, not set up)
+
+- RSS reader (`reader/`): `npm run dev` (Vite, `:5173`) but needs a feed backend (RSSHub + Redis) via `docker compose up rsshub redis` and Supabase. **Docker is not installed** in this VM.
+- Grav site (`grav/`): a `linuxserver/grav` Docker image; requires Docker.
+
+### Build / typecheck (no test framework)
+
+There is no test runner. Use `npm run build` (`vite build`) and `npx tsc --noEmit` (root and `reader/`) as the build/typecheck checks.
